@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>BENCH·LAB — 벤치프레스 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* ── TOKENS ───────────────────────────────── */
+:root{
+  --navy:#0D1B2A;
+  --navy-2:#162234;
+  --navy-3:#1E2E42;
+  --cobalt:#1A6FE8;
+  --cobalt-dim:#1355B5;
+  --signal:#FFED00;
+  --signal-dim:#C9BB00;
+  --red:#E83030;
+  --green:#18C97A;
+  --paper:#F0F4F9;
+  --paper-2:#E2E9F2;
+  --ink:#0D1B2A;
+  --muted:#7A90A8;
+  --border:#D0DBE9;
+  --r:6px;
+  --font-display:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html{height:100%;}
+body{
+  background:var(--navy);
+  color:var(--paper);
+  font-family:var(--font-body);
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── HEADER ───────────────────────────────── */
+.app-header{
+  background:var(--navy);
+  border-bottom:2px solid var(--cobalt);
+  padding:12px 16px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+  position:sticky;top:0;z-index:100;
+}
+.brand{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:1px;
+  line-height:1;
+}
+.brand em{color:var(--cobalt);font-style:normal;}
+.brand small{
+  display:block;
+  font-family:var(--font-body);
+  font-size:10px;
+  font-weight:400;
+  color:var(--muted);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+.header-rep{
+  text-align:right;
+  font-family:var(--font-display);
+}
+.header-rep .num{
+  font-size:32px;
+  font-weight:900;
+  color:var(--signal);
+  line-height:1;
+}
+.header-rep .lbl{
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+/* ── TABS ─────────────────────────────────── */
+.tab-bar{
+  display:flex;
+  background:var(--navy-2);
+  border-bottom:1px solid var(--navy-3);
+  flex-shrink:0;
+  overflow-x:auto;
+  scrollbar-width:none;
+  touch-action:pan-x;
+}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:1;
+  min-width:70px;
+  padding:11px 6px 9px;
+  font-family:var(--font-display);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:transparent;
+  border:none;
+  border-bottom:3px solid transparent;
+  cursor:pointer;
+  white-space:nowrap;
+  position:relative;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.tab-btn.active{
+  color:var(--paper);
+  border-bottom-color:var(--cobalt);
+}
+.tab-btn .notif{
+  position:absolute;
+  top:6px;right:8px;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--signal);
+}
+
+/* ── PAGES ────────────────────────────────── */
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{
+  position:absolute;inset:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  display:none;
+  flex-direction:column;
+  background:var(--navy);
+}
+.page.active{display:flex;}
+
+/* ── PAGE 1: STANDARD TABLE ──────────────── */
+.std-hero{
+  background:linear-gradient(135deg, var(--cobalt-dim) 0%, var(--navy-2) 60%);
+  padding:20px 16px 16px;
+}
+.std-hero h2{
+  font-family:var(--font-display);
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:0.5px;
+}
+.std-hero p{
+  font-size:12px;
+  color:rgba(240,244,249,0.7);
+  margin-top:4px;
+  line-height:1.5;
+}
+.ratio-formula{
+  margin-top:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(0,0,0,0.25);
+  border-radius:var(--r);
+  padding:8px 14px;
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:600;
+}
+.ratio-formula .eq{color:var(--signal);font-size:18px;font-weight:900;}
+
+/* my score calculator */
+.calc-card{
+  margin:14px 14px 0;
+  background:var(--navy-2);
+  border:1px solid var(--navy-3);
+  border-radius:var(--r);
+  padding:14px;
+}
+.calc-card h3{
+  font-family:var(--font-display);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.calc-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.calc-field{
+  flex:1;
+  min-width:80px;
+}
+.calc-field label{
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.calc-field select,
+.calc-field input{
+  width:100%;
+  background:var(--navy-3);
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:8px 10px;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.calc-field select:focus,
+.calc-field input:focus{border-color:var(--cobalt);}
+.calc-btn{
+  width:100%;
+  padding:11px;
+  background:var(--cobalt);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.calc-btn:active{background:var(--cobalt-dim);}
+.calc-result{
+  margin-top:10px;
+  display:none;
+}
+.calc-result.show{display:block;}
+.result-grade{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:4px;
+  border-left:4px solid var(--cobalt);
+  background:rgba(26,111,232,0.12);
+}
+.result-grade .grade-label{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:900;
+  color:var(--signal);
+}
+.result-grade .grade-detail{
+  font-size:12px;
+  color:rgba(240,244,249,0.75);
+  line-height:1.5;
+}
+.result-bar-wrap{
+  margin-top:8px;
+}
+.result-bar-label{
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  color:var(--muted);
+  margin-bottom:4px;
+  letter-spacing:0.5px;
+}
+.result-bar-bg{
+  height:8px;
+  background:var(--navy-3);
+  border-radius:4px;
+  overflow:hidden;
+}
+.result-bar-fill{
+  height:100%;
+  border-radius:4px;
+  background:linear-gradient(90deg, var(--cobalt) 0%, var(--signal) 100%);
+  width:0;
+  transition:width 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* table */
+.table-section{
+  margin:14px 14px 0;
+}
+.table-section h3{
+  font-family:var(--font-display);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:10px 0 6px;
+  border-bottom:1px solid var(--navy-3);
+  margin-bottom:0;
+}
+.table-scroll{overflow-x:auto;margin-top:0;}
+table.std-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11.5px;
+  min-width:440px;
+}
+table.std-table th{
+  background:var(--cobalt-dim);
+  color:#fff;
+  padding:6px 8px;
+  font-family:var(--font-display);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  text-align:center;
+  border:1px solid rgba(255,255,255,0.1);
+  white-space:nowrap;
+}
+table.std-table td{
+  padding:5px 8px;
+  border:1px solid var(--navy-3);
+  text-align:center;
+  color:rgba(240,244,249,0.85);
+  white-space:nowrap;
+}
+table.std-table tr:nth-child(even) td{background:rgba(255,255,255,0.025);}
+table.std-table .cat-cell{
+  font-family:var(--font-display);
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:var(--muted);
+  text-align:left;
+}
+table.std-table .pct-cell{
+  font-weight:600;
+  color:var(--paper);
+  font-family:'JetBrains Mono',monospace;
+}
+/* grade color coding */
+.g-superior{background:rgba(24,201,122,0.15)!important; color:var(--green)!important;}
+.g-excellent{background:rgba(26,111,232,0.12)!important; color:#7DB8FF!important;}
+.g-good{background:rgba(255,237,0,0.08)!important; color:var(--signal)!important;}
+.g-fair{background:rgba(255,200,0,0.08)!important;}
+.g-poor{background:rgba(232,48,48,0.08)!important; color:#FF9090!important;}
+
+.highlight-row td{
+  outline:2px solid var(--signal) !important;
+  outline-offset:-1px;
+  background:rgba(255,237,0,0.1)!important;
+  color:var(--signal)!important;
+  font-weight:700!important;
+}
+
+/* ── PAGE 2: CAMERA ───────────────────────── */
+.cam-stage{
+  position:relative;
+  width:100%;
+  background:#000;
+  overflow:hidden;
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.cam-stage video,
+.cam-stage canvas.pose-overlay{
+  position:absolute;
+  inset:0;width:100%;height:100%;
+  object-fit:cover;
+}
+.cam-stage video{transform:scaleX(-1);}
+.cam-stage canvas.pose-overlay{transform:scaleX(-1);pointer-events:none;}
+
+/* start screen */
+.cam-start{
+  position:relative;z-index:5;
+  width:85%;max-width:360px;
+  padding:22px 18px 20px;
+  background:rgba(13,27,42,0.92);
+  border:1px solid var(--navy-3);
+  border-top:3px solid var(--cobalt);
+  border-radius:var(--r);
+  backdrop-filter:blur(6px);
+}
+.cam-start h2{
+  font-family:var(--font-display);
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:0.5px;
+  margin-bottom:12px;
+}
+.cam-start h2 span{color:var(--cobalt);}
+.setup-row{
+  display:flex;gap:8px;margin-bottom:10px;
+}
+.setup-field{
+  flex:1;
+}
+.setup-field label{
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.setup-field select{
+  width:100%;
+  background:var(--navy-3);
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13px;
+  padding:8px 10px;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.cam-start-btn{
+  width:100%;
+  padding:13px;
+  background:var(--cobalt);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  margin-top:4px;
+}
+.cam-start-btn:active{background:var(--cobalt-dim);}
+
+/* HUD */
+.hud-top{
+  position:absolute;
+  top:10px;left:10px;right:10px;
+  z-index:4;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  pointer-events:none;
+}
+.phase-chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  background:rgba(13,27,42,0.85);
+  border:1px solid var(--navy-3);
+  padding:6px 10px;
+  border-radius:4px;
+  color:var(--muted);
+}
+.phase-chip.live{color:var(--cobalt);border-color:var(--cobalt);}
+.elbow-chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  background:rgba(13,27,42,0.85);
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  padding:6px 10px;
+  color:var(--paper);
+  text-align:right;
+}
+.elbow-chip b{color:var(--signal);font-size:13px;}
+
+/* call banner */
+.call-banner{
+  position:absolute;left:0;right:0;top:50%;
+  transform:translateY(-50%) scale(0.88);
+  z-index:6;
+  text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .1s, transform .1s;
+}
+.call-banner.show{opacity:1;transform:translateY(-50%) scale(1);}
+.call-word{
+  display:inline-block;
+  font-family:var(--font-display);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#fff;
+  text-shadow:0 0 30px rgba(26,111,232,0.6), 0 4px 8px rgba(0,0,0,0.6);
+}
+.call-banner.ok .call-word{color:var(--green);text-shadow:0 0 30px rgba(24,201,122,0.6);}
+.call-banner.fault .call-word{color:var(--red);text-shadow:0 0 30px rgba(232,48,48,0.6);}
+.call-sub{
+  margin-top:6px;
+  font-size:3.5vw;
+  color:rgba(240,244,249,0.85);
+  font-family:var(--font-display);
+  font-weight:600;
+  letter-spacing:0.5px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.7);
+}
+
+/* rep counter overlay */
+.rep-overlay{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:4;
+  pointer-events:none;
+}
+.rep-big{
+  font-family:var(--font-display);
+  font-size:48px;
+  font-weight:900;
+  color:var(--signal);
+  text-shadow:0 0 20px rgba(255,237,0,0.4), 0 3px 6px rgba(0,0,0,0.7);
+  line-height:1;
+  text-align:center;
+}
+.rep-lbl{
+  font-size:10px;
+  color:rgba(240,244,249,0.6);
+  text-align:center;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-family:var(--font-display);
+  font-weight:600;
+}
+
+/* sequence strip */
+.seq-strip{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  z-index:4;
+  display:flex;
+  background:rgba(13,27,42,0.88);
+  border-top:1px solid var(--navy-3);
+}
+.seq-step{
+  flex:1;
+  padding:8px 2px;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  color:var(--navy-3);
+  border-right:1px solid rgba(255,255,255,0.05);
+}
+.seq-step:last-child{border-right:none;}
+.seq-step.done{color:var(--green);}
+.seq-step.active{background:var(--cobalt);color:#fff;font-weight:700;}
+.seq-step.fault{background:var(--red);color:#fff;font-weight:700;}
+
+/* cam controls */
+.cam-controls{
+  display:flex;gap:8px;
+  padding:10px 12px;
+  background:var(--navy-2);
+  border-top:1px solid var(--navy-3);
+  flex-shrink:0;
+}
+.cam-controls button{
+  flex:1;
+  padding:11px 4px;
+  font-family:var(--font-display);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  background:transparent;
+  color:var(--paper);
+  cursor:pointer;
+}
+.cam-controls button.primary{
+  background:var(--cobalt);
+  border-color:var(--cobalt);
+  color:#fff;
+}
+.cam-controls button.active-toggle{
+  background:rgba(255,237,0,0.15);
+  border-color:var(--signal);
+  color:var(--signal);
+}
+
+.cam-log{
+  flex-shrink:0;
+  max-height:80px;
+  overflow-y:auto;
+  background:var(--navy-2);
+  border-top:1px solid var(--navy-3);
+  padding:6px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;
+}
+.cam-log-row{
+  display:flex;
+  justify-content:space-between;
+  padding:2.5px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  color:var(--muted);
+  font-size:10px;
+}
+.cam-log-row b{color:var(--paper);}
+.cam-log-row.pass b{color:var(--green);}
+.cam-log-row.fail b{color:var(--red);}
+.cam-log-empty{color:var(--navy-3);padding:8px 0;text-align:center;font-size:10px;}
+
+.cam-loading{
+  position:absolute;inset:0;z-index:8;
+  background:rgba(13,27,42,0.95);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:12px;
+}
+.cam-loading .spinner{
+  width:28px;height:28px;
+  border:2px solid var(--navy-3);
+  border-top-color:var(--cobalt);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.cam-loading p{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:0.5px;
+}
+
+.flip-cam-btn{
+  position:absolute;
+  bottom:48px;right:10px;
+  z-index:5;
+  width:36px;height:36px;
+  background:rgba(13,27,42,0.8);
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  color:var(--paper);
+  display:flex;
+  align-items:center;justify-content:center;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* ── PAGE 3: RANKING ──────────────────────── */
+.rank-header{
+  padding:16px 16px 12px;
+  background:var(--navy-2);
+  border-bottom:1px solid var(--navy-3);
+}
+.rank-header h2{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:900;
+}
+.rank-header p{font-size:12px;color:var(--muted);margin-top:3px;}
+.rank-post-card{
+  margin:12px 14px;
+  background:var(--navy-2);
+  border:1px solid var(--navy-3);
+  border-radius:var(--r);
+  padding:14px;
+}
+.rank-post-card h3{
+  font-family:var(--font-display);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.rank-form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.rank-form-field{flex:1;min-width:90px;}
+.rank-form-field label{
+  display:block;font-size:10px;
+  color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:4px;
+}
+.rank-form-field input,
+.rank-form-field select{
+  width:100%;
+  background:var(--navy-3);
+  border:1px solid var(--navy-3);
+  border-radius:4px;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13px;
+  padding:8px 10px;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.rank-form-field input:focus,
+.rank-form-field select:focus{border-color:var(--cobalt);}
+.rank-post-btn{
+  width:100%;
+  padding:11px;
+  background:var(--green);
+  color:var(--navy);
+  border:none;
+  border-radius:4px;
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.rank-post-btn:active{filter:brightness(0.85);}
+
+.rank-filters{
+  display:flex;
+  gap:6px;
+  padding:10px 14px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  flex-shrink:0;
+}
+.rank-filters::-webkit-scrollbar{display:none;}
+.filter-pill{
+  flex-shrink:0;
+  padding:6px 12px;
+  font-family:var(--font-display);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  border:1px solid var(--navy-3);
+  border-radius:20px;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+}
+.filter-pill.active{
+  background:var(--cobalt);
+  border-color:var(--cobalt);
+  color:#fff;
+}
+
+.rank-list{flex:1;padding:0 14px 80px;}
+.rank-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 12px;
+  background:var(--navy-2);
+  border:1px solid var(--navy-3);
+  border-radius:var(--r);
+  margin-bottom:8px;
+}
+.rank-item.rank-me{
+  border-color:var(--signal);
+  background:rgba(255,237,0,0.06);
+}
+.rank-num{
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:900;
+  color:var(--muted);
+  width:30px;
+  text-align:center;
+  flex-shrink:0;
+}
+.rank-item.rank-1 .rank-num{color:#FFD700;}
+.rank-item.rank-2 .rank-num{color:#C0C8D4;}
+.rank-item.rank-3 .rank-num{color:#CD7F32;}
+.rank-info{flex:1;min-width:0;}
+.rank-name{
+  font-family:var(--font-display);
+  font-size:16px;
+  font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rank-meta{
+  font-size:10.5px;
+  color:var(--muted);
+  margin-top:2px;
+}
+.rank-score{
+  text-align:right;
+  flex-shrink:0;
+}
+.rank-ratio{
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:900;
+  color:var(--signal);
+  line-height:1;
+}
+.rank-reps{
+  font-size:10px;
+  color:var(--muted);
+  text-align:right;
+  margin-top:1px;
+}
+.rank-grade-badge{
+  font-family:var(--font-display);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  padding:2px 6px;
+  border-radius:3px;
+  margin-top:3px;
+  display:inline-block;
+}
+.badge-superior{background:rgba(24,201,122,0.2);color:var(--green);}
+.badge-excellent{background:rgba(26,111,232,0.2);color:#7DB8FF;}
+.badge-good{background:rgba(255,237,0,0.15);color:var(--signal);}
+.badge-fair{background:rgba(255,255,255,0.08);color:var(--paper);}
+.badge-poor{background:rgba(232,48,48,0.15);color:#FF9090;}
+
+.rank-empty{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+/* ── PAGE 4: SUPPLEMENT TRAINING ─────────── */
+.supp-hero{
+  background:linear-gradient(135deg, rgba(13,55,112,0.8) 0%, var(--navy-2) 70%);
+  padding:18px 16px 14px;
+}
+.supp-hero h2{
+  font-family:var(--font-display);
+  font-size:24px;font-weight:900;letter-spacing:0.5px;
+}
+.supp-hero p{font-size:12px;color:rgba(240,244,249,0.7);margin-top:3px;line-height:1.5;}
+
+.supp-filter{
+  display:flex;gap:6px;
+  padding:10px 14px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.supp-filter::-webkit-scrollbar{display:none;}
+.supp-pill{
+  flex-shrink:0;
+  padding:6px 12px;
+  font-family:var(--font-display);
+  font-size:11px;font-weight:700;
+  letter-spacing:0.5px;text-transform:uppercase;
+  border:1px solid var(--navy-3);border-radius:20px;
+  background:transparent;color:var(--muted);cursor:pointer;
+}
+.supp-pill.active{background:var(--cobalt);border-color:var(--cobalt);color:#fff;}
+
+.supp-list{padding:0 14px 80px;}
+.supp-card{
+  background:var(--navy-2);
+  border:1px solid var(--navy-3);
+  border-radius:var(--r);
+  margin-bottom:12px;
+  overflow:hidden;
+}
+.supp-card-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-bottom:1px solid var(--navy-3);
+}
+.supp-icon{
+  width:42px;height:42px;
+  border-radius:var(--r);
+  background:rgba(26,111,232,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  flex-shrink:0;
+}
+.supp-title-wrap .supp-title{
+  font-family:var(--font-display);
+  font-size:17px;font-weight:700;
+}
+.supp-title-wrap .supp-target{
+  font-size:10.5px;color:var(--muted);margin-top:2px;
+}
+.supp-tag{
+  margin-left:auto;
+  font-family:var(--font-display);
+  font-size:9px;font-weight:700;
+  letter-spacing:0.5px;padding:3px 8px;
+  border-radius:3px;flex-shrink:0;
+}
+.supp-tag.primary-tag{background:rgba(26,111,232,0.2);color:#7DB8FF;}
+.supp-tag.compound-tag{background:rgba(24,201,122,0.15);color:var(--green);}
+.supp-tag.isolation-tag{background:rgba(255,237,0,0.12);color:var(--signal);}
+.supp-tag.stretch-tag{background:rgba(255,255,255,0.08);color:var(--paper);}
+
+.supp-body{padding:12px 14px;}
+.supp-desc{font-size:12.5px;color:rgba(240,244,249,0.8);line-height:1.6;margin-bottom:10px;}
+.supp-sets{
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.set-chip{
+  padding:5px 10px;
+  background:var(--navy-3);
+  border-radius:20px;
+  font-size:11px;
+  color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+}
+.set-chip b{color:var(--paper);}
+
+/* ── PAGE 5: QR & SHARE ──────────────────── */
+.qr-page{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:24px 20px 60px;
+}
+.qr-page h2{
+  font-family:var(--font-display);
+  font-size:24px;font-weight:900;
+  letter-spacing:0.5px;
+  margin-bottom:4px;
+  text-align:center;
+}
+.qr-page p{
+  font-size:12px;color:var(--muted);
+  text-align:center;line-height:1.5;margin-bottom:20px;
+}
+.qr-box{
+  background:#fff;
+  padding:16px;border-radius:var(--r);
+  margin-bottom:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+#qr-container canvas{display:block;}
+.qr-url{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  word-break:break-all;
+  text-align:center;
+  margin-bottom:16px;
+  padding:0 10px;
+}
+.share-btn{
+  width:100%;
+  max-width:300px;
+  padding:13px;
+  background:var(--cobalt);
+  color:#fff;
+  border:none;border-radius:4px;
+  font-family:var(--font-display);
+  font-size:15px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;
+  margin-bottom:10px;
+}
+.share-btn:active{background:var(--cobalt-dim);}
+.share-note{
+  font-size:11px;color:var(--muted);
+  text-align:center;line-height:1.6;
+  padding:0 20px;
+  margin-top:12px;
+}
+.share-stats{
+  width:100%;max-width:340px;
+  background:var(--navy-2);
+  border:1px solid var(--navy-3);
+  border-radius:var(--r);
+  padding:14px;
+  margin-top:10px;
+}
+.share-stats h3{
+  font-family:var(--font-display);
+  font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+}
+.stat-row{
+  display:flex;justify-content:space-between;
+  padding:5px 0;
+  border-bottom:1px solid var(--navy-3);
+  font-size:12px;color:rgba(240,244,249,0.75);
+}
+.stat-row:last-child{border-bottom:none;}
+.stat-row b{color:var(--paper);font-family:var(--font-display);font-size:14px;font-weight:700;}
+
+/* ── MISC ─────────────────────────────────── */
+.hidden{display:none!important;}
+.page-spacer{height:14px;}
+.section-divider{
+  height:1px;background:var(--navy-3);
+  margin:14px 14px 0;
+}
+
+/* ── QR shared data note ──────────────────── */
+.shared-note{
+  margin:0 14px 14px;
+  padding:10px 12px;
+  background:rgba(26,111,232,0.08);
+  border-left:3px solid var(--cobalt);
+  border-radius:0 4px 4px 0;
+  font-size:11px;
+  color:rgba(240,244,249,0.7);
+  line-height:1.5;
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div>
+    <div class="brand">BENCH<em>·</em>LAB <em style="font-size:13px;font-weight:400">β</em>
+      <small>벤치프레스 분석 · SELF JUDGE</small>
+    </div>
+  </div>
+  <div class="header-rep">
+    <div class="num" id="hdrRep">0</div>
+    <div class="lbl">REPS</div>
+  </div>
+</header>
+
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="standard">기준표</button>
+  <button class="tab-btn" data-tab="camera">측정 📷</button>
+  <button class="tab-btn" data-tab="ranking">랭킹 🏆</button>
+  <button class="tab-btn" data-tab="training">보조운동</button>
+  <button class="tab-btn" data-tab="qr">공유 QR</button>
+</nav>
+
+<script>
+/* ════════ TABS (delegated, runs independently so nothing else on the
+   page can block navigation) ════════ */
+(function(){
+  let lastSwitch = 0;
+  function switchTab(btn){
+    const now = Date.now();
+    if(now - lastSwitch < 250) return; // avoid double-fire from touchend+click
+    lastSwitch = now;
+    try{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const target = document.getElementById('page-'+tab);
+      if(target) target.classList.add('active');
+      if(tab==='ranking' && typeof loadRanking==='function') loadRanking();
+      if(tab==='qr' && typeof initQR==='function') initQR();
+    }catch(err){
+      console.error('tab switch error', err);
+    }
+  }
+  const bar = document.getElementById('tabBar');
+  bar.addEventListener('click', function(e){
+    const btn = e.target.closest('.tab-btn');
+    if(btn) switchTab(btn);
+  });
+  bar.addEventListener('touchend', function(e){
+    const btn = e.target.closest('.tab-btn');
+    if(btn){ e.preventDefault(); switchTab(btn); }
+  }, {passive:false});
+})();
+</script>
+
+<div class="pages">
+
+<!-- ═══════ PAGE 1: STANDARD ═══════ -->
+<div class="page active" id="page-standard" data-page="standard">
+  <div class="std-hero">
+    <h2>체력 범주 기준표</h2>
+    <p>Cooper Institute 기준 · 벤치프레스 체중비(1RM ÷ 체중)</p>
+    <div class="ratio-formula">
+      <span>체중비</span>
+      <span class="eq">=</span>
+      <span>1RM 중량(lb)</span>
+      <span class="eq">÷</span>
+      <span>체중(lb)</span>
+    </div>
+  </div>
+
+  <div class="calc-card">
+    <h3>내 수준 확인</h3>
+    <div class="calc-row">
+      <div class="calc-field">
+        <label>성별</label>
+        <select id="calcGender">
+          <option value="male">남성</option>
+          <option value="female">여성</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>나이</label>
+        <select id="calcAge">
+          <option value="u20">~19세</option>
+          <option value="20s" selected>20~29세</option>
+          <option value="30s">30~39세</option>
+          <option value="40s">40~49세</option>
+          <option value="50s">50~59세</option>
+          <option value="60p">60세 이상</option>
+        </select>
+      </div>
+    </div>
+    <div class="calc-row">
+      <div class="calc-field">
+        <label>체중 (kg)</label>
+        <input type="number" id="calcBodykg" placeholder="70" inputmode="decimal" min="30" max="200">
+      </div>
+      <div class="calc-field">
+        <label>1RM 중량 (kg)</label>
+        <input type="number" id="calcLiftkg" placeholder="80" inputmode="decimal" min="10" max="500">
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calcScore()">수준 확인하기</button>
+    <div class="calc-result" id="calcResult">
+      <div class="result-grade" id="resultGrade">
+        <div class="grade-label" id="resultLabel">—</div>
+        <div class="grade-detail" id="resultDetail">—</div>
+      </div>
+      <div class="result-bar-wrap">
+        <div class="result-bar-label">
+          <span>Very Poor</span>
+          <span id="resultRatioText">—</span>
+          <span>Superior</span>
+        </div>
+        <div class="result-bar-bg">
+          <div class="result-bar-fill" id="resultBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- 남성 표 -->
+  <div class="table-section">
+    <h3>남성 (Male)</h3>
+    <div class="table-scroll">
+      <table class="std-table" id="maleTable">
+        <thead>
+          <tr>
+            <th>%</th>
+            <th>등급</th>
+            <th>&lt;20</th>
+            <th>20~29</th>
+            <th>30~39</th>
+            <th>40~49</th>
+            <th>50~59</th>
+            <th>60+</th>
+          </tr>
+        </thead>
+        <tbody id="maleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- 여성 표 -->
+  <div class="table-section" style="margin-bottom:0;">
+    <h3>여성 (Female)</h3>
+    <div class="table-scroll">
+      <table class="std-table" id="femaleTable">
+        <thead>
+          <tr>
+            <th>%</th>
+            <th>등급</th>
+            <th>&lt;20</th>
+            <th>20~29</th>
+            <th>30~39</th>
+            <th>40~49</th>
+            <th>50~59</th>
+            <th>60+</th>
+          </tr>
+        </thead>
+        <tbody id="femaleBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page-spacer"></div>
+</div>
+
+<!-- ═══════ PAGE 2: CAMERA ═══════ -->
+<div class="page" id="page-camera" data-page="camera">
+  <div class="cam-stage" id="camStage">
+
+    <!-- start screen -->
+    <div class="cam-start" id="camStart">
+      <h2><span>카메라</span> 측정 시작</h2>
+      <div class="setup-row">
+        <div class="setup-field">
+          <label>촬영 각도</label>
+          <select id="camView">
+            <option value="front">정면</option>
+            <option value="side">측면</option>
+          </select>
+        </div>
+        <div class="setup-field">
+          <label>카메라</label>
+          <select id="camFacing">
+            <option value="user">전면</option>
+            <option value="environment">후면</option>
+          </select>
+        </div>
+      </div>
+      <button class="cam-start-btn" id="camStartBtn">시작하기</button>
+    </div>
+
+    <!-- loading -->
+    <div class="cam-loading hidden" id="camLoading">
+      <div class="spinner"></div>
+      <p id="camLoadText">모델 불러오는 중…</p>
+    </div>
+
+    <!-- video + overlay -->
+    <video id="camVideo" class="hidden" playsinline muted autoplay></video>
+    <canvas id="camCanvas" class="pose-overlay hidden"></canvas>
+
+    <!-- HUD -->
+    <div class="hud-top hidden" id="camHud">
+      <div class="phase-chip" id="camPhase">대기</div>
+      <div class="elbow-chip" id="camElbow">ELBOW <b>--°</b></div>
+    </div>
+
+    <!-- rep overlay -->
+    <div class="rep-overlay hidden" id="repOverlay">
+      <div class="rep-big" id="repBig">0</div>
+      <div class="rep-lbl">REPS</div>
+    </div>
+
+    <!-- call banner -->
+    <div class="call-banner" id="callBanner">
+      <div class="call-word" id="callWord">START</div>
+      <div class="call-sub" id="callSub"></div>
+    </div>
+
+    <!-- seq strip -->
+    <div class="seq-strip hidden" id="seqStrip">
+      <div class="seq-step active" data-step="start">START</div>
+      <div class="seq-step" data-step="descent">DOWN</div>
+      <div class="seq-step" data-step="pause">PAUSE</div>
+      <div class="seq-step" data-step="press">PRESS</div>
+      <div class="seq-step" data-step="lockout">LOCK</div>
+      <div class="seq-step" data-step="rack">RACK</div>
+    </div>
+
+    <button class="flip-cam-btn hidden" id="flipCamBtn">⟲</button>
+  </div>
+
+  <div class="cam-controls hidden" id="camControls">
+    <button id="camResetBtn">초기화</button>
+    <button id="camVoiceBtn" class="primary">🔊 음성</button>
+    <button id="camStopBtn">종료</button>
+  </div>
+
+  <div class="cam-log hidden" id="camLog">
+    <div class="cam-log-empty" id="camLogEmpty">판정 기록이 여기에 표시됩니다.</div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE 3: RANKING ═══════ -->
+<div class="page" id="page-ranking" data-page="ranking">
+  <div class="rank-header">
+    <h2>🏆 랭킹</h2>
+    <p>체중비(1RM ÷ 체중) 기준 · 전체 유저 순위</p>
+  </div>
+
+  <div class="rank-post-card">
+    <h3>내 기록 등록</h3>
+    <div class="rank-form-row">
+      <div class="rank-form-field">
+        <label>닉네임</label>
+        <input type="text" id="rankName" placeholder="닉네임" maxlength="12">
+      </div>
+      <div class="rank-form-field">
+        <label>성별</label>
+        <select id="rankGender">
+          <option value="male">남성</option>
+          <option value="female">여성</option>
+        </select>
+      </div>
+    </div>
+    <div class="rank-form-row">
+      <div class="rank-form-field">
+        <label>나이</label>
+        <select id="rankAge">
+          <option value="u20">~19세</option>
+          <option value="20s" selected>20~29세</option>
+          <option value="30s">30~39세</option>
+          <option value="40s">40~49세</option>
+          <option value="50s">50~59세</option>
+          <option value="60p">60세 이상</option>
+        </select>
+      </div>
+      <div class="rank-form-field">
+        <label>체중 (kg)</label>
+        <input type="number" id="rankBody" placeholder="70" inputmode="decimal" min="30" max="200">
+      </div>
+      <div class="rank-form-field">
+        <label>1RM (kg)</label>
+        <input type="number" id="rankLift" placeholder="100" inputmode="decimal" min="10" max="500">
+      </div>
+    </div>
+    <div class="shared-note">랭킹 데이터는 모든 사용자와 공유됩니다.</div>
+    <button class="rank-post-btn" onclick="postRank()">등록하기</button>
+  </div>
+
+  <div class="rank-filters">
+    <button class="filter-pill active" data-gender="all">전체</button>
+    <button class="filter-pill" data-gender="male">남성</button>
+    <button class="filter-pill" data-gender="female">여성</button>
+  </div>
+
+  <div class="rank-list" id="rankList">
+    <div class="rank-empty">로딩 중…</div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE 4: TRAINING ═══════ -->
+<div class="page" id="page-training" data-page="training">
+  <div class="supp-hero">
+    <h2>보조운동 추천</h2>
+    <p>벤치프레스 기록 향상을 위한 근거 기반 보조운동</p>
+  </div>
+
+  <div class="supp-filter">
+    <button class="supp-pill active" data-cat="all">전체</button>
+    <button class="supp-pill" data-cat="compound">복합운동</button>
+    <button class="supp-pill" data-cat="isolation">고립운동</button>
+    <button class="supp-pill" data-cat="stretch">스트레칭</button>
+    <button class="supp-pill" data-cat="primary">직접 보조</button>
+  </div>
+
+  <div class="supp-list" id="suppList"></div>
+</div>
+
+<!-- ═══════ PAGE 5: QR ═══════ -->
+<div class="page" id="page-qr" data-page="qr">
+  <div class="qr-page">
+    <h2>앱 공유 QR</h2>
+    <p>이 QR을 스캔하면 BENCH·LAB을 바로 열 수 있어요.<br>친구에게 공유하거나 체육관 벽에 붙여두세요.</p>
+    <div class="qr-box">
+      <div id="qr-container"></div>
+    </div>
+    <div class="qr-url" id="qrUrl">앱 URL이 여기에 표시됩니다</div>
+    <button class="share-btn" onclick="shareApp()">📤 링크 공유하기</button>
+
+    <div class="share-stats" id="shareStats">
+      <h3>내 기록 요약</h3>
+      <div class="stat-row"><span>오늘 총 렙</span><b id="statReps">0</b></div>
+      <div class="stat-row"><span>반칙 없는 성공 렙</span><b id="statPass">0</b></div>
+      <div class="stat-row"><span>반칙 감지 횟수</span><b id="statFault">0</b></div>
+    </div>
+
+    <p class="share-note">
+      실제 HTTPS URL로 호스팅하면 QR이 정확하게 작동합니다.<br>
+      GitHub Pages, Netlify 등 무료 호스팅 사용 권장.
+    </p>
+  </div>
+</div>
+
+</div><!-- end .pages -->
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+/* ════════════ STANDARD TABLE DATA ════════════
+   Cooper Institute 체중비 기준 (이미지 데이터 그대로 입력)
+   형식: [percentile, grade, u20, 20s, 30s, 40s, 50s, 60p]
+*/
+const MALE_DATA = [
+  [99,'superior','>1.76','>1.63','>1.35','>1.20','>1.05','>0.94'],
+  [95,'superior','1.76','1.63','1.35','1.20','1.05','0.94'],
+  [90,'excellent','1.46','1.48','1.24','1.10','0.97','0.89'],
+  [85,'excellent','1.38','1.37','1.17','1.04','0.93','0.84'],
+  [80,'excellent','1.34','1.32','1.12','1.00','0.90','0.82'],
+  [75,'good','1.29','1.26','1.08','0.96','0.87','0.79'],
+  [70,'good','1.24','1.22','1.04','0.93','0.84','0.77'],
+  [65,'good','1.23','1.18','1.01','0.90','0.81','0.74'],
+  [60,'good','1.19','1.14','0.98','0.88','0.79','0.72'],
+  [55,'fair','1.16','1.10','0.96','0.86','0.77','0.70'],
+  [50,'fair','1.13','1.06','0.93','0.84','0.75','0.68'],
+  [45,'fair','1.10','1.03','0.90','0.82','0.73','0.67'],
+  [40,'fair','1.06','0.99','0.88','0.80','0.71','0.66'],
+  [35,'poor','1.01','0.96','0.86','0.78','0.70','0.65'],
+  [30,'poor','0.96','0.93','0.83','0.76','0.68','0.63'],
+  [25,'poor','0.93','0.90','0.81','0.74','0.66','0.60'],
+  [20,'poor','0.89','0.88','0.78','0.72','0.63','0.57'],
+  [15,'poor','0.86','0.84','0.75','0.69','0.60','0.56'],
+  [10,'verypoor','0.81','0.80','0.71','0.65','0.57','0.53'],
+  [5,'verypoor','0.76','0.72','0.65','0.59','0.53','0.49'],
+  [1,'verypoor','<0.76','<0.72','<0.65','<0.59','<0.53','<0.49'],
+];
+const FEMALE_DATA = [
+  [99,'superior','>0.88','>1.01','>0.82','>0.77','>0.68','>0.72'],
+  [95,'superior','0.88','1.01','0.82','0.77','0.68','0.72'],
+  [90,'excellent','0.83','0.90','0.76','0.71','0.61','0.64'],
+  [85,'excellent','0.81','0.83','0.72','0.66','0.57','0.59'],
+  [80,'excellent','0.77','0.80','0.70','0.62','0.55','0.54'],
+  [75,'good','0.76','0.77','0.65','0.60','0.53','0.53'],
+  [70,'good','0.74','0.74','0.63','0.57','0.52','0.51'],
+  [65,'good','0.70','0.72','0.62','0.55','0.50','0.48'],
+  [60,'good','0.65','0.70','0.60','0.54','0.48','0.47'],
+  [55,'fair','0.64','0.68','0.58','0.53','0.47','0.45'],
+  [50,'fair','0.63','0.65','0.57','0.52','0.46','0.45'],
+  [45,'fair','0.60','0.63','0.55','0.51','0.45','0.44'],
+  [40,'fair','0.58','0.59','0.53','0.50','0.44','0.43'],
+  [35,'poor','0.57','0.58','0.52','0.48','0.43','0.41'],
+  [30,'poor','0.56','0.56','0.51','0.47','0.42','0.40'],
+  [25,'poor','0.55','0.53','0.49','0.45','0.41','0.39'],
+  [20,'poor','0.53','0.51','0.47','0.43','0.39','0.38'],
+  [15,'poor','0.52','0.50','0.45','0.42','0.38','0.36'],
+  [10,'verypoor','0.50','0.48','0.42','0.38','0.37','0.33'],
+  [5,'verypoor','0.41','0.44','0.39','0.35','0.31','0.26'],
+  [1,'verypoor','<0.41','<0.44','<0.39','<0.35','<0.31','<0.26'],
+];
+
+const GRADE_LABEL = {
+  'superior':'매우 훌륭함 (Superior)',
+  'excellent':'훌륭함 (Excellent)',
+  'good':'우수함 (Good)',
+  'fair':'양호함 (Fair)',
+  'poor':'부족함 (Poor)',
+  'verypoor':'매우 부족함 (Very Poor)',
+};
+const GRADE_CSS = {
+  'superior':'g-superior','excellent':'g-excellent',
+  'good':'g-good','fair':'g-fair','poor':'g-poor','verypoor':'g-poor',
+};
+const AGE_IDX = {u20:2,['20s']:3,['30s']:4,['40s']:5,['50s']:6,['60p']:7};
+
+/* render tables */
+function gradeSpan(rows,i){
+  if(i===0) return GRADE_LABEL['superior'];
+  if(rows[i][1]!==rows[i-1][1]) return GRADE_LABEL[rows[i][1]];
+  return '';
+}
+function buildTable(tbodyId,data){
+  const tbody = document.getElementById(tbodyId);
+  let lastGrade='';
+  data.forEach((row,i)=>{
+    const tr = document.createElement('tr');
+    const css = GRADE_CSS[row[1]]||'';
+    const gradeText = row[1]!==lastGrade ? GRADE_LABEL[row[1]] : '';
+    lastGrade = row[1];
+    tr.innerHTML = `
+      <td class="pct-cell">${row[0]}</td>
+      <td class="cat-cell ${css}">${gradeText}</td>
+      ${[2,3,4,5,6,7].map(ci=>`<td class="${css}">${row[ci]}</td>`).join('')}
+    `;
+    tr.dataset.pct = row[0];
+    tr.dataset.grade = row[1];
+    tbody.appendChild(tr);
+  });
+}
+buildTable('maleBody', MALE_DATA);
+buildTable('femaleBody', FEMALE_DATA);
+
+/* calc score */
+let lastCalcResult = null;
+function calcScore(){
+  const gender = document.getElementById('calcGender').value;
+  const ageKey = document.getElementById('calcAge').value;
+  const bodyKg = parseFloat(document.getElementById('calcBodykg').value);
+  const liftKg = parseFloat(document.getElementById('calcLiftkg').value);
+  if(!bodyKg||!liftKg||bodyKg<=0||liftKg<=0){
+    alert('체중과 1RM 중량을 입력해주세요.');return;
+  }
+  // kg → lb conversion
+  const bodyLb = bodyKg * 2.20462;
+  const liftLb = liftKg * 2.20462;
+  const ratio = liftLb / bodyLb;
+  const data = gender==='male' ? MALE_DATA : FEMALE_DATA;
+  const ageColIdx = AGE_IDX[ageKey];
+
+  // find grade
+  let grade='verypoor', pctile=1;
+  for(let i=0;i<data.length;i++){
+    const valStr = data[i][ageColIdx];
+    const val = parseFloat(valStr.replace('>','').replace('<',''));
+    if(!isNaN(val) && ratio >= val){
+      grade = data[i][1];
+      pctile = data[i][0];
+      break;
+    }
+  }
+  lastCalcResult = {gender, ageKey, ratio, grade, pctile, bodyKg, liftKg};
+
+  // result UI
+  const pct = Math.min(98, Math.max(2, pctile));
+  const barPct = {verypoor:8,poor:20,fair:38,good:58,excellent:78,superior:93}[grade]||8;
+
+  document.getElementById('resultLabel').textContent = GRADE_LABEL[grade].split(' (')[0];
+  document.getElementById('resultDetail').textContent =
+    `체중비 ${ratio.toFixed(2)} · 상위 ${100-pct}% · ${GRADE_LABEL[grade]}`;
+  document.getElementById('resultRatioText').textContent = ratio.toFixed(2);
+  document.getElementById('calcResult').classList.add('show');
+
+  const resultGrade = document.getElementById('resultGrade');
+  resultGrade.className = 'result-grade';
+  const gradeBg = {superior:'rgba(24,201,122,0.12)',excellent:'rgba(26,111,232,0.12)',
+    good:'rgba(255,237,0,0.08)',fair:'rgba(255,255,255,0.06)',
+    poor:'rgba(232,48,48,0.08)',verypoor:'rgba(232,48,48,0.12)'};
+  resultGrade.style.background = gradeBg[grade]||'';
+  resultGrade.style.borderLeftColor =
+    {superior:'#18C97A',excellent:'#1A6FE8',good:'#FFED00',
+     fair:'#8A9BB0',poor:'#E83030',verypoor:'#E83030'}[grade]||'';
+
+  setTimeout(()=>{
+    document.getElementById('resultBar').style.width = barPct+'%';
+  }, 50);
+
+  // highlight table row
+  document.querySelectorAll('.std-table tr').forEach(r=>r.classList.remove('highlight-row'));
+  const tableId = gender==='male' ? 'maleBody' : 'femaleBody';
+  const rows = document.querySelectorAll(`#${tableId} tr`);
+  rows.forEach(r=>{
+    if(parseInt(r.dataset.pct)===pctile) r.classList.add('highlight-row');
+  });
+  // scroll to table
+  setTimeout(()=>{
+    document.querySelector(`#${tableId}`).closest('.table-section').scrollIntoView({behavior:'smooth'});
+  }, 400);
+}
+
+/* (tab click handling now lives in the delegated listener right after
+   the <nav class="tab-bar"> element, so it can't be broken by errors
+   in the data/rendering code above) */
+</script>
+
+<!-- ════ SUPPLEMENT TRAINING DATA ════ -->
+<script>
+const EXERCISES = [
+  {
+    cat:'primary',icon:'🏋️',title:'클로즈그립 벤치프레스',target:'삼두근 · 내측 가슴',
+    tag:'primary-tag',tagLabel:'직접 보조',
+    desc:'그립 폭을 좁혀 삼두근에 집중하는 변형 동작. 삼두근 잠금 힘(락아웃)을 직접 강화해 프레스 완성도를 높입니다.',
+    sets:[{k:'세트',v:'4 세트'},{k:'횟수',v:'6~10회'},{k:'인터벌',v:'2~3분'},{k:'강도',v:'1RM의 70~80%'}]
+  },
+  {
+    cat:'compound',icon:'🤸',title:'딥스 (Dips)',target:'가슴 하부 · 삼두근 · 전면 삼각근',
+    tag:'compound-tag',tagLabel:'복합운동',
+    desc:'상체 밀기의 핵심 복합운동. 가슴 하부와 삼두근의 협응력을 키워 벤치프레스 전체 호를 강화합니다. 체중에 익숙해지면 가중 딥스로 전환하세요.',
+    sets:[{k:'세트',v:'3 세트'},{k:'횟수',v:'8~12회'},{k:'인터벌',v:'90초'},{k:'팁',v:'상체를 살짝 앞으로'}]
+  },
+  {
+    cat:'compound',icon:'🔄',title:'오버헤드 프레스',target:'전면 삼각근 · 삼두근',
+    tag:'compound-tag',tagLabel:'복합운동',
+    desc:'수직 밀기 패턴으로 어깨 전면부와 상부 흉근을 보완합니다. 벤치프레스의 시작 자세(시작 자세 안정성)에 직접 기여합니다.',
+    sets:[{k:'세트',v:'4 세트'},{k:'횟수',v:'6~8회'},{k:'인터벌',v:'2분'},{k:'강도',v:'1RM의 65~75%'}]
+  },
+  {
+    cat:'isolation',icon:'💪',title:'케이블 플라이',target:'가슴 중앙부 · 내전 근력',
+    tag:'isolation-tag',tagLabel:'고립운동',
+    desc:'가슴 근육의 수축 범위를 극대화하는 마무리 운동. 낮은 중량, 높은 수축 집중으로 근육량을 늘리고 가슴 터치 자신감을 높입니다.',
+    sets:[{k:'세트',v:'3 세트'},{k:'횟수',v:'12~15회'},{k:'인터벌',v:'60초'},{k:'팁',v:'최대 수축 1초 유지'}]
+  },
+  {
+    cat:'isolation',icon:'🦾',title:'삼두근 로프 푸시다운',target:'삼두근 장두 · 내측두',
+    tag:'isolation-tag',tagLabel:'고립운동',
+    desc:'팔꿈치 완전 신전(락아웃)에 직접 기여하는 삼두근 강화 운동. 케이블로 일정한 장력을 유지하며 전 범위 훈련합니다.',
+    sets:[{k:'세트',v:'3 세트'},{k:'횟수',v:'12~15회'},{k:'인터벌',v:'60초'},{k:'팁',v:'팔꿈치 위치 고정'}]
+  },
+  {
+    cat:'compound',icon:'🏊',title:'바벨 로우',target:'광배근 · 능형근 · 후면 삼각근',
+    tag:'compound-tag',tagLabel:'복합운동',
+    desc:'당기기 패턴으로 어깨 후면과 등 근육을 균형 있게 발달시킵니다. 벤치프레스 시 견갑골 안정성과 아치 유지력을 향상시켜 안전하고 강력한 프레스를 가능하게 합니다.',
+    sets:[{k:'세트',v:'4 세트'},{k:'횟수',v:'6~8회'},{k:'인터벌',v:'2분'},{k:'팁',v:'견갑골 후인 유지'}]
+  },
+  {
+    cat:'isolation',icon:'🦅',title:'페이스 풀',target:'후면 삼각근 · 외회전근',
+    tag:'isolation-tag',tagLabel:'고립운동',
+    desc:'어깨 후면과 외회전근을 강화해 부상 예방과 어깨 건강을 유지합니다. 프레스 볼륨이 높을수록 이 운동의 비중도 높이세요.',
+    sets:[{k:'세트',v:'3 세트'},{k:'횟수',v:'15~20회'},{k:'인터벌',v:'60초'},{k:'팁',v:'엄지손가락이 위를 향하게'}]
+  },
+  {
+    cat:'stretch',icon:'🧘',title:'흉추 이동성 스트레칭',target:'흉추 신전 · 가슴 유연성',
+    tag:'stretch-tag',tagLabel:'스트레칭',
+    desc:'폼롤러나 요가 블록을 이용한 흉추 신전 스트레칭. 벤치프레스 아치(Arch)를 더 깊게 만들어 유효 가동범위를 넓히고 어깨 부담을 줄입니다.',
+    sets:[{k:'지속',v:'60초 × 3'},{k:'빈도',v:'매일'},{k:'팁',v:'날숨에 더 깊이 이완'},{k:'도구',v:'폼롤러 / 요가 블록'}]
+  },
+  {
+    cat:'stretch',icon:'🌀',title:'어깨 외회전 스트레칭',target:'소원근 · 극하근 · 견관절',
+    tag:'stretch-tag',tagLabel:'스트레칭',
+    desc:'벤치프레스 후 필수 어깨 회복 스트레칭. 견관절 외회전 유연성을 유지하면 어깨 충돌 증후군을 예방하고 장기 훈련을 지속할 수 있습니다.',
+    sets:[{k:'지속',v:'30초 × 각 3회'},{k:'빈도',v:'운동 후'},{k:'팁',v:'통증이 아닌 당김 정도로'},{k:'시기',v:'세션 마무리'}]
+  },
+  {
+    cat:'primary',icon:'⚡',title:'스피드 벤치 프레스',target:'폭발력 · 신경근 활성화',
+    tag:'primary-tag',tagLabel:'직접 보조',
+    desc:'1RM의 50~60% 중량으로 최대 속도로 밀어올리는 속도 훈련. 신경근 동원율을 높여 같은 중량을 더 빠르고 힘있게 들 수 있게 해줍니다.',
+    sets:[{k:'세트',v:'6~8 세트'},{k:'횟수',v:'3회'},{k:'인터벌',v:'60초'},{k:'강도',v:'1RM의 50~60%'}]
+  },
+];
+
+function buildExercises(cat){
+  const list = document.getElementById('suppList');
+  list.innerHTML='';
+  const filtered = cat==='all' ? EXERCISES : EXERCISES.filter(e=>e.cat===cat);
+  filtered.forEach(ex=>{
+    const card = document.createElement('div');
+    card.className='supp-card';
+    card.innerHTML=`
+      <div class="supp-card-head">
+        <div class="supp-icon">${ex.icon}</div>
+        <div class="supp-title-wrap">
+          <div class="supp-title">${ex.title}</div>
+          <div class="supp-target">${ex.target}</div>
+        </div>
+        <span class="supp-tag ${ex.tag}">${ex.tagLabel}</span>
+      </div>
+      <div class="supp-body">
+        <p class="supp-desc">${ex.desc}</p>
+        <div class="supp-sets">
+          ${ex.sets.map(s=>`<div class="set-chip"><b>${s.k}</b> ${s.v}</div>`).join('')}
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+buildExercises('all');
+
+document.querySelectorAll('.supp-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('.supp-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    buildExercises(pill.dataset.cat);
+  });
+});
+</script>
+
+<!-- ════ RANKING SYSTEM ════ -->
+<script>
+const RANK_KEY = 'bench_lab_rankings_v1';
+
+function getRankings(){
+  try{
+    const data = JSON.parse(localStorage.getItem(RANK_KEY)||'[]');
+    return Array.isArray(data)?data:[];
+  }catch(e){return[];}
+}
+function saveRankings(data){
+  try{ localStorage.setItem(RANK_KEY,JSON.stringify(data)); }catch(e){}
+}
+
+const AGE_LABEL = {u20:'~19세','20s':'20~29세','30s':'30~39세',
+  '40s':'40~49세','50s':'50~59세','60p':'60세+'};
+
+function getGradeForRatio(gender,ageKey,ratio){
+  const data = gender==='male' ? MALE_DATA : FEMALE_DATA;
+  const ageColIdx = AGE_IDX[ageKey];
+  for(let i=0;i<data.length;i++){
+    const valStr = data[i][ageColIdx];
+    const val = parseFloat(valStr.replace('>','').replace('<',''));
+    if(!isNaN(val) && ratio>=val) return data[i][1];
+  }
+  return 'verypoor';
+}
+
+const BADGE = {
+  superior:{cls:'badge-superior',label:'매우 훌륭함'},
+  excellent:{cls:'badge-excellent',label:'훌륭함'},
+  good:{cls:'badge-good',label:'우수함'},
+  fair:{cls:'badge-fair',label:'양호함'},
+  poor:{cls:'badge-poor',label:'부족함'},
+  verypoor:{cls:'badge-poor',label:'매우 부족함'},
+};
+
+let rankFilter = 'all';
+document.querySelectorAll('.filter-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    rankFilter = pill.dataset.gender;
+    renderRanking();
+  });
+});
+
+function postRank(){
+  const name = document.getElementById('rankName').value.trim();
+  const gender = document.getElementById('rankGender').value;
+  const ageKey = document.getElementById('rankAge').value;
+  const bodyKg = parseFloat(document.getElementById('rankBody').value);
+  const liftKg = parseFloat(document.getElementById('rankLift').value);
+  if(!name){alert('닉네임을 입력해주세요.');return;}
+  if(!bodyKg||!liftKg){alert('체중과 1RM 중량을 입력해주세요.');return;}
+  const bodyLb = bodyKg*2.20462;
+  const liftLb = liftKg*2.20462;
+  const ratio = +(liftLb/bodyLb).toFixed(3);
+  const grade = getGradeForRatio(gender,ageKey,ratio);
+  const entry = {name,gender,ageKey,bodyKg,liftKg,ratio,grade,ts:Date.now()};
+  const data = getRankings();
+  // 같은 닉네임이면 업데이트
+  const idx = data.findIndex(d=>d.name===name);
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  saveRankings(data);
+  renderRanking();
+  // scroll to list
+  document.getElementById('rankList').scrollIntoView({behavior:'smooth'});
+}
+
+function loadRanking(){ renderRanking(); }
+
+function renderRanking(){
+  let data = getRankings();
+  if(rankFilter!=='all') data=data.filter(d=>d.gender===rankFilter);
+  data.sort((a,b)=>b.ratio-a.ratio);
+
+  const list = document.getElementById('rankList');
+  if(data.length===0){
+    list.innerHTML='<div class="rank-empty">아직 등록된 기록이 없습니다.<br>첫 번째 기록을 등록해보세요! 💪</div>';
+    return;
+  }
+  const myName = document.getElementById('rankName').value.trim();
+  list.innerHTML='';
+  data.forEach((entry,i)=>{
+    const badge = BADGE[entry.grade]||BADGE.verypoor;
+    const isMe = myName && entry.name===myName;
+    const div=document.createElement('div');
+    div.className='rank-item'+(i===0?' rank-1':i===1?' rank-2':i===2?' rank-3':'')+(isMe?' rank-me':'');
+    div.innerHTML=`
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${entry.name}${isMe?' 👈':''}</div>
+        <div class="rank-meta">${entry.gender==='male'?'남':'여'} · ${AGE_LABEL[entry.ageKey]||''} · ${entry.bodyKg}kg → ${entry.liftKg}kg</div>
+        <span class="rank-grade-badge ${badge.cls}">${badge.label}</span>
+      </div>
+      <div class="rank-score">
+        <div class="rank-ratio">${entry.ratio.toFixed(2)}</div>
+        <div class="rank-reps">체중비</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// seed some demo data so ranking isn't empty on first open
+(function seedDemo(){
+  const data = getRankings();
+  if(data.length>0) return;
+  const demos=[
+    {name:'파워킹',gender:'male',ageKey:'20s',bodyKg:80,liftKg:120,ratio:1.36,grade:'excellent',ts:Date.now()-86400000},
+    {name:'철의여인',gender:'female',ageKey:'30s',bodyKg:58,liftKg:55,ratio:0.86,grade:'excellent',ts:Date.now()-43200000},
+    {name:'헬스초보',gender:'male',ageKey:'30s',bodyKg:75,liftKg:55,ratio:0.67,grade:'poor',ts:Date.now()-7200000},
+    {name:'시니어챔피온',gender:'male',ageKey:'50s',bodyKg:70,liftKg:65,ratio:0.84,grade:'excellent',ts:Date.now()-3600000},
+  ];
+  saveRankings(demos);
+})();
+</script>
+
+<!-- ════ QR CODE ════ -->
+<script>
+let qrInited=false;
+function initQR(){
+  if(qrInited) return;
+  qrInited=true;
+  const url = window.location.href.split('#')[0];
+  document.getElementById('qrUrl').textContent=url;
+  const container=document.getElementById('qr-container');
+  try{
+    new QRCode(container,{
+      text:url,
+      width:200,height:200,
+      colorDark:'#0D1B2A',
+      colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.H
+    });
+  }catch(e){
+    container.textContent='QR 라이브러리 로드 실패 (CDN 연결 확인)';
+  }
+}
+function shareApp(){
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:'BENCH·LAB 벤치프레스 분석',url}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>alert('링크가 복사되었습니다.')).catch(()=>alert(url));
+  }
+}
+</script>
+
+<!-- ════ CAMERA + POSE ════ -->
+<script type="module">
+import {PoseLandmarker,FilesetResolver,DrawingUtils}
+  from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+
+/* ── state ── */
+let poseLandmarker=null,stream=null,running=false,voiceOn=true;
+let repCount=0,passCount=0,faultCount=0;
+let phase='start',view='front',faultActive=false;
+let pauseStillFrames=0,pauseConfirmed=false,lockoutStillFrames=0;
+let wristHistory=[],lastFaultAt=0,minElbowDescent=999;
+const FAULT_CD=1300,STILL_NEEDED=12,PAUSE_VEL=0.006;
+const ELBOW_EXT=160,CHEST_PROX=0.09;
+
+const PHASES=['start','descent','pause','press','lockout','rack'];
+
+/* ── dom ── */
+const video=document.getElementById('camVideo');
+const canvas=document.getElementById('camCanvas');
+const ctx=canvas.getContext('2d');
+const camStart=document.getElementById('camStart');
+const camLoading=document.getElementById('camLoading');
+const camLoadText=document.getElementById('camLoadText');
+const camHud=document.getElementById('camHud');
+const seqStrip=document.getElementById('seqStrip');
+const camControls=document.getElementById('camControls');
+const camLog=document.getElementById('camLog');
+const flipBtn=document.getElementById('flipCamBtn');
+const repOverlay=document.getElementById('repOverlay');
+const repBig=document.getElementById('repBig');
+const hdrRep=document.getElementById('hdrRep');
+const phaseChip=document.getElementById('camPhase');
+const elbowChip=document.getElementById('camElbow');
+const callBanner=document.getElementById('callBanner');
+const callWord=document.getElementById('callWord');
+const callSub=document.getElementById('callSub');
+
+/* ── setup ── */
+async function setupPose(){
+  camLoadText.textContent='AI 모델 불러오는 중…';
+  const vision=await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+  poseLandmarker=await PoseLandmarker.createFromOptions(vision,{
+    baseOptions:{
+      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+      delegate:"GPU"
+    },
+    runningMode:"VIDEO",numPoses:1
+  });
+}
+async function setupCam(){
+  camLoadText.textContent='카메라 권한 요청 중…';
+  const facingMode=document.getElementById('camFacing').value;
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({
+    video:{facingMode,width:{ideal:720},height:{ideal:1280}},audio:false
+  });
+  video.srcObject=stream;
+  await new Promise(res=>video.onloadedmetadata=res);
+  await video.play();
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  const flip=facingMode==='user';
+  video.style.transform=flip?'scaleX(-1)':'none';
+  canvas.style.transform=flip?'scaleX(-1)':'none';
+}
+
+/* ── geometry ── */
+function angleAt(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
+  const dot=ab.x*cb.x+ab.y*cb.y;
+  const mag=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
+  return mag===0?180:Math.acos(Math.max(-1,Math.min(1,dot/mag)))*180/Math.PI;
+}
+const LM={LS:11,RS:12,LE:13,RE:14,LW:15,RW:16,LH:23,RH:24};
+
+/* ── speech ── */
+function speak(text,force=false){
+  if(!voiceOn) return;
+  if(force) window.speechSynthesis.cancel();
+  else if(window.speechSynthesis.speaking) return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ko-KR';u.rate=1.05;u.pitch=0.95;
+  window.speechSynthesis.speak(u);
+}
+
+/* ── call banner ── */
+function showCall(word,sub,kind,ms=900){
+  callWord.textContent=word;
+  callSub.textContent=sub||'';
+  callBanner.className='call-banner show'+(kind?' '+kind:'');
+  const len=word.length;
+  const isKo=/[가-힣]/.test(word);
+  callWord.style.fontSize=isKo
+    ?(len<=4?'11vw':len<=6?'8.5vw':'6.5vw')
+    :(len<=6?'15vw':len<=9?'10vw':'7.5vw');
+  clearTimeout(showCall._t);
+  showCall._t=setTimeout(()=>callBanner.classList.remove('show'),ms);
+}
+
+/* ── log ── */
+function addLog(label,status,detail){
+  document.getElementById('camLogEmpty')?.remove();
+  const row=document.createElement('div');
+  row.className='cam-log-row '+(status==='pass'?'pass':status==='fail'?'fail':'');
+  const t=new Date().toLocaleTimeString('ko-KR',{hour12:false});
+  row.innerHTML=`<span>${t} · ${detail||''}</span><b>${label}</b>`;
+  camLog.prepend(row);
+}
+
+/* ── phase UI ── */
+function setPhaseUI(p){
+  [...seqStrip.children].forEach(el=>{
+    el.classList.remove('active','done','fault');
+    const idx=PHASES.indexOf(p);
+    const ei=PHASES.indexOf(el.dataset.step);
+    if(ei<idx) el.classList.add('done');
+    if(ei===idx) el.classList.add('active');
+  });
+  const m={start:'START 대기',descent:'DESCENT',pause:'PAUSE 체크',press:'PRESS',lockout:'LOCKOUT 체크',rack:'RACK'};
+  phaseChip.textContent=m[p]||p;
+  phaseChip.classList.toggle('live',p!=='start');
+}
+function markFault(step){
+  seqStrip.querySelector(`[data-step="${step}"]`)?.classList.replace('active','fault')
+    || seqStrip.querySelector(`[data-step="${step}"]`)?.classList.add('fault');
+}
+function transitionTo(next){ phase=next; setPhaseUI(next); }
+
+/* ── fault ── */
+function triggerFault(step,word,sub){
+  const now=performance.now();
+  if(now-lastFaultAt<FAULT_CD) return false;
+  lastFaultAt=now; faultActive=true;
+  markFault(step);
+  showCall(word,sub,'fault',1100);
+  speak(word==='터치앤고'?'터치앤고, 노 리프트':'반칙',true);
+  addLog(word,'fail',sub);
+  faultCount++;
+  document.getElementById('statFault').textContent=faultCount;
+  return true;
+}
+
+/* ── reset ── */
+function resetRep(){
+  phase='start';pauseStillFrames=0;pauseConfirmed=false;
+  lockoutStillFrames=0;wristHistory=[];faultActive=false;
+  minElbowDescent=999; setPhaseUI('start');
+}
+
+/* ── phase machine ── */
+function runPhase({avg,asym,vertDist,vel}){
+  const checkAsym=view==='front';
+  if(phase==='start'){
+    if(avg>=ELBOW_EXT&&(!checkAsym||asym<25)){
+      transitionTo('descent');showCall('START','시작 자세 확인','ok',700);speak('스타트');
+    }
+  } else if(phase==='descent'){
+    minElbowDescent=Math.min(minElbowDescent,avg);
+    if(vertDist<CHEST_PROX){ transitionTo('pause');pauseStillFrames=0;pauseConfirmed=false; }
+  } else if(phase==='pause'){
+    if(vertDist<CHEST_PROX*1.4){
+      if(vel<PAUSE_VEL) pauseStillFrames++;
+      else pauseStillFrames=Math.max(0,pauseStillFrames-2);
+      if(pauseStillFrames>=STILL_NEEDED&&!pauseConfirmed){
+        pauseConfirmed=true;
+        showCall('PRESS','일시 정지 확인됨','ok',800);speak('프레스');
+        transitionTo('press');
+      }
+    } else if(!pauseConfirmed){
+      const fired=triggerFault('pause','터치앤고','가슴에서 완전히 멈추지 않았습니다');
+      if(fired){ pauseConfirmed=true; setTimeout(()=>transitionTo('press'),500); }
+    }
+  } else if(phase==='press'){
+    if(avg>=ELBOW_EXT){
+      if(checkAsym&&asym>22){
+        const f=triggerFault('lockout','비대칭락아웃',`좌우 차이 ${asym.toFixed(0)}°`);
+        if(f) setTimeout(()=>{ transitionTo('lockout');lockoutStillFrames=0; },500);
+      } else { transitionTo('lockout');lockoutStillFrames=0; }
+    }
+  } else if(phase==='lockout'){
+    if(avg>=ELBOW_EXT){ lockoutStillFrames++;
+      if(lockoutStillFrames>=Math.round(STILL_NEEDED*0.6)){
+        transitionTo('rack');showCall('RACK','락아웃 안정 확인','ok',900);speak('랙');
+      }
+    } else if(avg<ELBOW_EXT-12) lockoutStillFrames=0;
+  } else if(phase==='rack'){
+    if(vertDist>CHEST_PROX*2.2&&avg<ELBOW_EXT-15){
+      repCount++; repBig.textContent=repCount; hdrRep.textContent=repCount;
+      if(!faultActive){ passCount++; document.getElementById('statPass').textContent=passCount; }
+      addLog('완료',faultActive?'fail':'pass',faultActive?'반칙 포함':'정상 인정');
+      document.getElementById('statReps').textContent=repCount;
+      resetRep();
+    }
+  }
+}
+
+/* ── draw skeleton ── */
+function drawSkeleton(lm){
+  const pairs=[[LM.LS,LM.RS],[LM.LS,LM.LE],[LM.LE,LM.LW],[LM.RS,LM.RE],[LM.RE,LM.RW],
+                [LM.LS,LM.LH],[LM.RS,LM.RH],[LM.LH,LM.RH]];
+  ctx.strokeStyle='rgba(26,111,232,0.9)';ctx.lineWidth=4;ctx.lineCap='round';
+  pairs.forEach(([i,j])=>{
+    const a=lm[i],b=lm[j];
+    if((a.visibility||1)<0.3||(b.visibility||1)<0.3) return;
+    ctx.beginPath();ctx.moveTo(a.x*canvas.width,a.y*canvas.height);
+    ctx.lineTo(b.x*canvas.width,b.y*canvas.height);ctx.stroke();
+  });
+  [LM.LS,LM.RS,LM.LE,LM.RE,LM.LW,LM.RW].forEach(i=>{
+    const p=lm[i];if((p.visibility||1)<0.3)return;
+    ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,6,0,Math.PI*2);
+    ctx.fillStyle='#FFED00';ctx.fill();
+  });
+}
+
+/* ── main loop ── */
+let lastVT=-1;
+function loop(){
+  if(!running) return;
+  if(video.currentTime!==lastVT){
+    lastVT=video.currentTime;
+    const res=poseLandmarker.detectForVideo(video,performance.now());
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(res.landmarks?.length){
+      const lm=res.landmarks[0];
+      drawSkeleton(lm);
+      const ls=lm[LM.LS],rs=lm[LM.RS],le=lm[LM.LE],re=lm[LM.RE],lw=lm[LM.LW],rw=lm[LM.RW];
+      const minVis=Math.min(ls.visibility||0,rs.visibility||0,le.visibility||0,re.visibility||0,lw.visibility||0,rw.visibility||0);
+      if(minVis>=0.35){
+        const la=angleAt(ls,le,lw),ra=angleAt(rs,re,rw);
+        const avg=(la+ra)/2,asym=Math.abs(la-ra);
+        elbowChip.innerHTML=`ELBOW <b>${avg.toFixed(0)}°</b>`;
+        const wMidX=(lw.x+rw.x)/2,wMidY=(lw.y+rw.y)/2;
+        const sMidY=(ls.y+rs.y)/2;
+        wristHistory.push({x:wMidX,y:wMidY});
+        if(wristHistory.length>6) wristHistory.shift();
+        let vel=0;
+        if(wristHistory.length>=2){
+          const a=wristHistory[0],b=wristHistory[wristHistory.length-1];
+          vel=Math.hypot(b.x-a.x,b.y-a.y)/(wristHistory.length-1);
+        }
+        runPhase({avg,asym,vertDist:Math.abs(wMidY-sMidY),vel});
+      } else elbowChip.innerHTML=`ELBOW <b>가림</b>`;
+    } else elbowChip.innerHTML=`ELBOW <b>--°</b>`;
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ── start btn ── */
+document.getElementById('camStartBtn').addEventListener('click',async()=>{
+  view=document.getElementById('camView').value;
+  camStart.classList.add('hidden');
+  camLoading.classList.remove('hidden');
+  try{
+    await setupPose();
+    await setupCam();
+    camLoading.classList.add('hidden');
+    video.classList.remove('hidden');
+    canvas.classList.remove('hidden');
+    camHud.classList.remove('hidden');
+    seqStrip.classList.remove('hidden');
+    camControls.classList.remove('hidden');
+    camLog.classList.remove('hidden');
+    flipBtn.classList.remove('hidden');
+    repOverlay.classList.remove('hidden');
+    resetRep();running=true;
+    loop();
+    showCall('READY','시작 자세를 잡아주세요',null,1200);
+  }catch(err){
+    const insecure = location.protocol==='file:' ||
+      (location.protocol==='http:' && location.hostname!=='localhost');
+    if(insecure || !navigator.mediaDevices){
+      camLoadText.textContent='카메라 분석은 보안 연결(https)에서만 동작합니다. 이 파일을 웹에 올리거나 https 주소로 접속한 뒤 다시 시도해주세요.';
+    } else {
+      camLoadText.textContent='오류: '+(err.message||err);
+    }
+    console.error(err);
+  }
+});
+
+/* ── controls ── */
+document.getElementById('camResetBtn').addEventListener('click',()=>{
+  resetRep();showCall('RESET','카운트는 유지됩니다',null,700);
+});
+document.getElementById('camVoiceBtn').addEventListener('click',function(){
+  voiceOn=!voiceOn;
+  this.textContent=voiceOn?'🔊 음성':'🔇 음성';
+  this.classList.toggle('active-toggle',!voiceOn);
+});
+document.getElementById('camStopBtn').addEventListener('click',()=>{
+  running=false;
+  stream?.getTracks().forEach(t=>t.stop());
+  window.speechSynthesis.cancel();
+  [video,canvas,camHud,seqStrip,camControls,camLog,flipBtn,repOverlay]
+    .forEach(el=>el.classList.add('hidden'));
+  callBanner.classList.remove('show');
+  camStart.classList.remove('hidden');
+});
+flipBtn.addEventListener('click',async()=>{
+  const sel=document.getElementById('camFacing');
+  sel.value=sel.value==='user'?'environment':'user';
+  await setupCam();
+});
+</script>
+
+</body>
+</html>
